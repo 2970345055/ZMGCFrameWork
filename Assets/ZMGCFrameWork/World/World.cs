@@ -51,8 +51,67 @@ public partial class World
     {
         
     }
+    /// <summary>
+    /// 销毁世界
+    /// </summary>
+    public  void DestoryWorld(string nameSpace,object pars=null)
+    {   
+        //需要移除的列表
+        List<string> needRemoveList = new List<string>();
     
-    
+        ///释放数据层的脚本
+        foreach (var item in _dattaBehaviours)
+        {
+            if (string.Equals(item.Value.GetType().Namespace,nameSpace))
+            {
+                needRemoveList.Add(item.Key);
+            }
+        }
+        
+        foreach (var key in needRemoveList)
+        {
+            _dattaBehaviours[key].OnDestory();
+            _dattaBehaviours.Remove(key);
+        }
+        needRemoveList.Clear();
+        
+        ///释放逻辑层脚本
+        foreach (var item in _logicBehaviours)
+        {
+            if (string.Equals(item.Value.GetType().Namespace,nameSpace))
+            {
+                needRemoveList.Add(item.Key);
+            }
+        }
+        
+        foreach (var key in needRemoveList)
+        {
+            _logicBehaviours[key].OnDestory();
+            _logicBehaviours.Remove(key);
+        }
+        needRemoveList.Clear();
+        
+        ///释放消息层脚本
+        foreach (var item in _msgBehaviours)
+        {
+            if (string.Equals(item.Value.GetType().Namespace,nameSpace))
+            {
+                needRemoveList.Add(item.Key);
+            }
+        }
+
+        foreach (var key in needRemoveList)
+        {
+            _msgBehaviours[key].OnDestory();
+            _msgBehaviours.Remove(key);
+        }
+        needRemoveList.Clear();
+        
+        OnDestory();
+        
+        OnDestoryPostProcess(pars);
+    }
+
     /// <summary>
     /// 获取逻辑层控制器
     /// </summary>
