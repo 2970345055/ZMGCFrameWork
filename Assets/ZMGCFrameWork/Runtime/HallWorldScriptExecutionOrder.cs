@@ -3,19 +3,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HallWorldScriptExecutionOrder
+public class HallWorldScriptExecutionOrder: IBehaviourExcution
+
 {
-   public static Type[] logicBehaviorExecutions = new Type[]
+   private static Type[] logicBehaviorExecutions = new Type[]
    {
        
    };
    
-   public static Type[] DataBehaviorExecutions = new Type[]
+   private static Type[] DataBehaviorExecutions = new Type[]
    {
        
    };
-   public static Type[] MsgBehaviorExecutions = new Type[]
+   private static Type[] MsgBehaviorExecutions = new Type[]
    {
        
    };
+
+   public Type[] GetLogicBehaviourExcution()
+   {
+      return logicBehaviorExecutions;
+   }
+
+   public Type[] GetDataBehaviourExcution()
+   {
+      return DataBehaviorExecutions;
+   }
+
+   public Type[] GetMsgBehaviourExcution()
+   {
+      return MsgBehaviorExecutions;
+   }
 }

@@ -30,13 +30,25 @@ public class WorldManager
         
         ///调用初始化的脚本事件
         
-        
+        TypeManager.InitlizateWorldAssemblise(world,GetBehaviourExcution(world));
         
         world.OnCreate();
         
         mWorldList.Add(world);
     }
     
+    
+    public static IBehaviourExcution GetBehaviourExcution(World world)
+    {
+        if (world.GetType().Name=="HallWorld")
+        {
+            return new HallWorldScriptExecutionOrder();
+        }
+
+        return null;
+    }
+
+
     /// <summary>
     /// 销毁对应的游戏世界
     /// </summary>

@@ -14,7 +14,7 @@ public partial class World
     /// <summary>
     /// 数据层存储所以的类
     /// </summary>
-    private static Dictionary<string, IDattaBehaviour> _dattaBehaviours = new Dictionary<string, IDattaBehaviour>();
+    private static Dictionary<string, IDataBehaviour> _dattaBehaviours = new Dictionary<string, IDataBehaviour>();
 
     /// <summary>
     ///消息层存储所以的类
@@ -136,9 +136,9 @@ public partial class World
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static T GetExitsDataCtrl<T>()where T: IDattaBehaviour
+    public static T GetExitsDataCtrl<T>()where T: IDataBehaviour
     {
-        IDattaBehaviour logic = null;
+        IDataBehaviour logic = null;
         
         if (_dattaBehaviours.TryGetValue(typeof(T).Name,out  logic))
         {

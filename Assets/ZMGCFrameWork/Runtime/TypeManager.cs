@@ -5,12 +5,14 @@ using UnityEditor.Compilation;
 using UnityEngine;
 using Assembly = System.Reflection.Assembly;
 
-public class TypeManager 
+public class TypeManager
 {
+
+    private static IBehaviourExcution mBehaviourExcution;
    
-   public static void InitlizateWorldAssemblise(World world)
+   public static void InitlizateWorldAssemblise(World world,IBehaviourExcution behaviourExcution )
    {
-         
+       mBehaviourExcution = behaviourExcution;
       //Unity和我们创建的脚本所在的程序集
        
        Assembly[] assemblies =AppDomain.CurrentDomain.GetAssemblies();
@@ -39,12 +41,16 @@ public class TypeManager
        string NameSpace = world.GetType().Namespace;
 
        Type logicType = typeof(ILogicBehaviour);
-       Type msgType = typeof(IDattaBehaviour);
+       Type msgType = typeof(IDataBehaviour);
        Type dataType = typeof(IMsgBehaviour);
         
        // 获取当前程序集下的所以类
        Type[] typearr = worldAssembly.GetTypes();
 
+       List<TypeOrder> logicBehaviourList = new List<TypeOrder>();
+       List<TypeOrder> dataBehaviourList = new List<TypeOrder>();
+       List<TypeOrder>msgBehaviourList = new List<TypeOrder>();
+       
        foreach (var type in typearr)
        {
            string space = type.Namespace;
@@ -56,16 +62,115 @@ public class TypeManager
                }
                
                if (logicType.IsAssignableFrom(type))
-               {
-                   
+               {  
+                   ///获取当前类的执行顺序
+                   int order = GetLogicBehaviourOrderIndex(type);
+                   TypeOrder typeOrder = new TypeOrder(order,type);
+                   logicBehaviourList.Add(typeOrder);
+
                }else if (dataType.IsAssignableFrom(type))
                {
                    
+                   int order = GetDataBehaviourOrderIndex(type);
+                   TypeOrder typeOrder = new TypeOrder(order,type);
+                   dataBehaviourList.Add(typeOrder);
+                   
                }else if (msgType.IsAssignableFrom(type))
                {
-                   
+                   int order = GetMsgBehaviourOrderIndex(type);
+                   TypeOrder typeOrder = new TypeOrder(order,type);
+                   msgBehaviourList.Add(typeOrder);
+
                }
            }
        }
+       
+       ///list中的类按照order 进行排序  降序 最小的在最前面
+       logicBehaviourList.Sort((a,b)=>a.order.CompareTo(b.order));
+       dataBehaviourList.Sort((a,b)=>a.order.CompareTo(b.order));
+       msgBehaviourList.Sort((a,b)=>a.order.CompareTo(b.order));
+       
+       //初始化数据层脚本，消息层脚本，逻辑层脚本
+       for (int i = 0; i < dataBehaviourList.Count; i++)
+       {
+           IDataBehaviour data =Activator.CreateInstance(dataBehaviourList[i].type) as IDataBehaviour;
+           
+           world.AddDataCrtl(data);
+       }
+       
+       for (int i = 0; i < msgBehaviourList.Count; i++)
+       {
+           IMsgBehaviour msg =Activator.CreateInstance(dataBehaviourList[i].type) as IMsgBehaviour;
+           world.AddMsgCrtl(msg);
+           
+       }
+       for (int i = 0; i < logicBehaviourList.Count; i++)
+       {
+           ILogicBehaviour logic =Activator.CreateInstance(dataBehaviourList[i].type) as ILogicBehaviour;
+           
+           world.AddLogicCrtl(logic);
+           
+       }
+       
+       dataBehaviourList.Clear();
+       msgBehaviourList.Clear();
+       logicBehaviourList.Clear();
+       mBehaviourExcution = null;
    }
+   
+    /// <summary>
+    /// 获取逻基层的脚本执行顺序
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+   public static int GetLogicBehaviourOrderIndex(Type Logictype)
+   {
+       Type[] logicTypes = mBehaviourExcution.GetLogicBehaviourExcution();
+
+       for (int i = 0; i < logicTypes.Length; i++)
+       {
+           if (logicTypes[i]==Logictype)
+           {
+               return i;
+           }
+       }
+       return 999;
+   }
+    /// <summary>
+    /// 获取数据层基层的脚本执行顺序
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static int GetDataBehaviourOrderIndex(Type Datatype)
+    {
+        Type[] logicTypes = mBehaviourExcution.GetLogicBehaviourExcution();
+
+        for (int i = 0; i < logicTypes.Length; i++)
+        {
+            if (logicTypes[i]==Datatype)
+            {
+                return i;
+            }
+        }
+        return 999;
+    }
+    
+    /// <summary>
+    /// 获取消息层的脚本执行顺序
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static int GetMsgBehaviourOrderIndex(Type Msgtype)
+    {
+        Type[] logicTypes = mBehaviourExcution.GetLogicBehaviourExcution();
+
+        for (int i = 0; i < logicTypes.Length; i++)
+        {
+            if (logicTypes[i]==Msgtype)
+            {
+                return i;
+            }
+        }
+        return 999;
+    }
 }
